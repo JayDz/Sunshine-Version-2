@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="metric_entries">
+        <item>@string/metric_label</item>
+        <item>@string/imperial_label</item>
+    </string-array>
+
+    <string-array name="metric_entry_values">
+        <item>@string/metric_unit</item>
+        <item>@string/imperial_unit</item>
+    </string-array>
+</resources>

@@ -1,8 +1,11 @@
 package com.example.android.sunshine.app;
 
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.text.format.Time;
 import android.util.Log;
@@ -12,8 +15,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,6 +31,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 /**
  * Author:      Jeffrey Diaz
@@ -39,12 +45,12 @@ public class ForecastFragment extends Fragment {
 	private static final String AUTHORITY = "http://api.openweathermap.org/data/2.5/forecast/daily?";
 	private static final String q_KEY = "q";
 	private static final String units_KEY = "units";
-	private static final String units_VALUE = "metric";
 	private static final String cnt_KEY = "cnt";
 	private static final String cnt_VALUE = "7";
 	private static final String id_KEY = "APPID";
 	private static final String id_VALUE = "43cae2e440e29a8696f03582a5d84e0c";
 
+	private ArrayAdapter<String> forecastAdapter;
 	private ListView mListView;
 
 	public ForecastFragment() {
@@ -58,11 +64,33 @@ public class ForecastFragment extends Fragment {
 	}
 
 	@Override
+	public void onStart()
+	{
+		super.onStart();
+		startFetchWeatherTask();
+	}
+
+	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState) {
 		View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
+		forecastAdapter = new ArrayAdapter<>(getActivity(),
+			R.layout.list_item_forecast, R.id.list_item_forecast_textview, new ArrayList<String>());
+
 		mListView = (ListView) rootView.findViewById(R.id.listview_forecast);
+		mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
+			{
+				String extraText = adapterView.getAdapter().getItem(i).toString();
+				Intent intent = new Intent(getActivity(), DetailsActivity.class);
+				intent.putExtra(Intent.EXTRA_TEXT, extraText);
+				startActivity(intent);
+			}
+		});
+
+		mListView.setAdapter(forecastAdapter);
 
 		return rootView;
 	}
@@ -76,17 +104,31 @@ public class ForecastFragment extends Fragment {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_refresh:
-			new FetchWeatherTask().execute("94043");
+			startFetchWeatherTask();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
 	}
 
+	private void startFetchWeatherTask() {
+		new FetchWeatherTask().execute(getPostalCodeFromSharedPref());
+	}
+
+	private String getPostalCodeFromSharedPref() {
+		return PreferenceManager.getDefaultSharedPreferences(getActivity())
+			.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
+	}
+
+	private String getMetricFromSharedPref() {
+		return PreferenceManager.getDefaultSharedPreferences(getActivity())
+			.getString(getString(R.string.pref_unit_key), getString(R.string.pref_unit_default));
+	}
+
 	private String buildUrl(String postalCode) {
 		Uri uri = Uri.parse(AUTHORITY).buildUpon()
 			.appendQueryParameter(q_KEY, postalCode)
-			.appendQueryParameter(units_KEY, units_VALUE)
+			.appendQueryParameter(units_KEY, getMetricFromSharedPref())
 			.appendQueryParameter(cnt_KEY, cnt_VALUE)
 			.appendQueryParameter(id_KEY, id_VALUE)
 			.build();
@@ -272,16 +314,9 @@ public class ForecastFragment extends Fragment {
 
 	private void updateListOfForecasts(String[] forecasts) {
 		if (forecasts != null) {
-			if (mListView.getAdapter() != null) {
-				ArrayAdapter<String> adapter = (ArrayAdapter) mListView.getAdapter();
-				adapter.clear();
-				for (String forecast : forecasts) {
-					adapter.add(forecast);
-				}
-			} else {
-				ArrayAdapter<String> forecastAdapter = new ArrayAdapter<>(getActivity(),
-					R.layout.list_item_forecast, R.id.list_item_forecast_textview, forecasts);
-				mListView.setAdapter(forecastAdapter);
+			forecastAdapter.clear();
+			for (String forecast : forecasts) {
+				forecastAdapter.add(forecast);
 			}
 		}
 	}
