@@ -43,7 +43,7 @@ public class ForecastFragment extends Fragment {
 	private static final String TAG = "ForecastFragment";
 
 	private static final String AUTHORITY = "http://api.openweathermap.org/data/2.5/forecast/daily?";
-	private static final String q_KEY = "q";
+	private static final String q_KEY = "zip";
 	private static final String units_KEY = "units";
 	private static final String cnt_KEY = "cnt";
 	private static final String cnt_VALUE = "7";
