@@ -1,7 +1,6 @@
 package com.example.android.sunshine.app;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -18,7 +17,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,8 +38,6 @@ import java.util.ArrayList;
  */
 public class ForecastFragment extends Fragment {
 
-	private static final String TAG = "ForecastFragment";
-
 	private static final String AUTHORITY = "http://api.openweathermap.org/data/2.5/forecast/daily?";
 	private static final String q_KEY = "zip";
 	private static final String units_KEY = "units";
@@ -51,7 +47,6 @@ public class ForecastFragment extends Fragment {
 	private static final String id_VALUE = "43cae2e440e29a8696f03582a5d84e0c";
 
 	private ArrayAdapter<String> forecastAdapter;
-	private ListView mListView;
 
 	public ForecastFragment() {
 	}
@@ -78,8 +73,8 @@ public class ForecastFragment extends Fragment {
 		forecastAdapter = new ArrayAdapter<>(getActivity(),
 			R.layout.list_item_forecast, R.id.list_item_forecast_textview, new ArrayList<String>());
 
-		mListView = (ListView) rootView.findViewById(R.id.listview_forecast);
-		mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+		ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
+		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
 			{
@@ -90,7 +85,7 @@ public class ForecastFragment extends Fragment {
 			}
 		});
 
-		mListView.setAdapter(forecastAdapter);
+		listView.setAdapter(forecastAdapter);
 
 		return rootView;
 	}
